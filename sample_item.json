@@ -1,48 +1,46 @@
-[
-    {
-        "content": "How do I create a GUID in Python that is platform independent? I hear there is a method using ActivePython on Windows but it's Windows only because it uses COM. Is there a method using plain Python?",
-        "update_time": "2021-11-27 10:16:54",
-        "user_id": "111",
-        "post_id": "58c45a6d-4766-494d-b92d-1604af91f47e",
-        "search_title": "how to create a guid/uuid in python",
-        "comments": [
-            {
-                "update_time": "2021-11-27 11:31:19",
-                "create_time": "2021-11-27 11:31:19",
-                "user_id": "112",
-                "responses": [
-                    {
-                        "update_time": "2021-11-27 11:34:09",
-                        "version_id": "e6c0da4d-7c0c-4150-9eea-19ad0f245ca6",
-                        "create_time": "2021-11-27 11:34:09",
-                        "user_id": "122",
-                        "response_id": "4f6f47ee-357b-4dfd-85bf-f332e58a179b",
-                        "content": "For the love of all that is sacred, it's a UUID - Universal Unique ID en.wikipedia.org/wiki/Universally_unique_identifier - its just that unfortunately MS has preferrred GUID."
-                    },
-                    {
-                        "update_time": "2021-11-27 11:35:27",
-                        "version_id": "f050b2dd-2c93-4e46-a0f2-6cc4d5a8fb4b",
-                        "create_time": "2021-11-27 11:35:27",
-                        "user_id": "125",
-                        "response_id": "8f7d55f1-1175-4965-8a51-b353682402a9",
-                        "content": "Here's one liner for you: python -c 'import uuid; print(uuid.uuid4())'"
-                    }
-                ],
-                "version_id": "3918d3ac-a620-4bac-82af-cebf5e535030",
-                "comment_id": "d3413bde-225d-4d46-86e5-21f6099c1007",
-                "content": "The uuid module provides immutable UUID objects (the UUID class) and the functions uuid1(), uuid3(), uuid4(), uuid5() for generating version 1, 3, 4, and 5 UUIDs as specified in RFC 4122."
-            },
-            {
-                "update_time": "2021-11-27 11:36:42",
-                "version_id": "2da9f131-4596-444a-8b89-d4e508c5ce60",
-                "create_time": "2021-11-27 11:36:42",
-                "comment_id": "ece03558-b934-4aed-8a1e-5cbb75300b0f",
-                "user_id": "113",
-                "content": "If you're using Python 2.5 or later, the uuid module is already included with the Python standard distribution."
-            }
-        ],
-        "create_time": "2021-11-27 10:16:54",
-        "version_id": "922b15e5-212d-4824-b230-56c0d31a36ab",
-        "title": "How to create a GUID/UUID in Python"
-    }
-]
+{
+    "content": "How do I create a GUID in Python that is platform independent? I hear there is a method using ActivePython onWindows but it's Windows only because it uses COM. Is there a method using plain Python?",
+    "update_time": "2021-11-27 10:16:54",
+    "user_id": "111",
+    "post_id": "58c45a6d-4766-494d-b92d-1604af91f47e",
+    "search_title": "how to create a guid/uuid in python",
+    "comments": [
+        {
+            "update_time": "2021-11-27 11:31:19",
+            "create_time": "2021-11-27 11:31:19",
+            "user_id": "112",
+            "responses": [
+                {
+                    "update_time": "2021-11-27 11:34:09",
+                    "version_id": "e6c0da4d-7c0c-4150-9eea-19ad0f245ca6",
+                    "create_time": "2021-11-27 11:34:09",
+                    "user_id": "122",
+                    "response_id": "4f6f47ee-357b-4dfd-85bf-f332e58a179b",
+                    "content": "For the love of all that is sacred, it's a UUID - Universal Unique ID en.wikipedia.org/wikiUniversally_unique_identifier - its just that unfortunately MS has preferrred GUID."
+                },
+                {
+                    "update_time": "2021-11-27 11:35:27",
+                    "version_id": "f050b2dd-2c93-4e46-a0f2-6cc4d5a8fb4b",
+                    "create_time": "2021-11-27 11:35:27",
+                    "user_id": "125",
+                    "response_id": "8f7d55f1-1175-4965-8a51-b353682402a9",
+                    "content": "Here's one liner for you: python -c 'import uuid; print(uuid.uuid4())'"
+                }
+            ],
+            "version_id": "3918d3ac-a620-4bac-82af-cebf5e535030",
+            "comment_id": "d3413bde-225d-4d46-86e5-21f6099c1007",
+            "content": "The uuid module provides immutable UUID objects (the UUID class) and the functions uuid1(), uuid3(), uuid(), uuid5() for generating version 1, 3, 4, and 5 UUIDs as specified in RFC 4122."
+        },
+        {
+            "update_time": "2021-11-27 11:36:42",
+            "version_id": "2da9f131-4596-444a-8b89-d4e508c5ce60",
+            "create_time": "2021-11-27 11:36:42",
+            "comment_id": "ece03558-b934-4aed-8a1e-5cbb75300b0f",
+            "user_id": "113",
+            "content": "If you're using Python 2.5 or later, the uuid module is already included with the Python standarddistribution."
+        }
+    ],
+    "create_time": "2021-11-27 10:16:54",
+    "version_id": "922b15e5-212d-4824-b230-56c0d31a36ab",
+    "title": "How to create a GUID/UUID in Python"
+}
