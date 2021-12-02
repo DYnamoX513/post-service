@@ -63,7 +63,8 @@ def get_posts():
 @app.route('/api/posts', methods=['POST'])
 def create_post():
     data = request.get_json()
-    data['post_id'] = str(uuid.uuid4())
+    if 'post_id' not in data:
+        data['post_id'] = str(uuid.uuid4())
     data['version_id'] = str(uuid.uuid4())
     create_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
     data['create_time'] = create_time
@@ -79,7 +80,7 @@ def create_post():
                 }
             }
         )
-        rsp = Response(json.dumps(data, default=str), status=200, content_type="application/json")
+        rsp = Response(json.dumps(data, default=str), status=201, content_type="application/json")
     except Exception as e:
         rsp = Response("{}".format(e), status=400)
 
@@ -153,7 +154,7 @@ def create_comment(post_id):
             },
             ReturnValues="UPDATED_NEW"
         )
-        rsp = Response(json.dumps(data, default=str), status=200, content_type="application/json")
+        rsp = Response(json.dumps(data, default=str), status=201, content_type="application/json")
     except Exception as e:
         rsp = Response("{}".format(e), status=400)
 
@@ -183,7 +184,7 @@ def create_response(post_id, comment_index):
             },
             ReturnValues="UPDATED_NEW"
         )
-        rsp = Response(json.dumps(data, default=str), status=200, content_type="application/json")
+        rsp = Response(json.dumps(data, default=str), status=201, content_type="application/json")
     except Exception as e:
         rsp = Response("{}".format(e), status=400)
 
