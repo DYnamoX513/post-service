@@ -1,4 +1,4 @@
-from flask import Flask, Response, request, url_for
+from flask import Flask, Response, request, url_for, redirect, g
 from flask_cors import CORS
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
@@ -13,7 +13,51 @@ AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
 REGION_NAME = config("REGION_NAME")
 
 app = Flask(__name__)
+
+# -------------------- authentication --------------------
+import requests
+from flask_cors import CORS
+from context import API_GATEWAY_URL
 CORS(app)
+
+@app.before_request
+def before_request():
+
+    # verify id_token
+    id_token = request.headers.get('id_token')
+    url = f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
+    response = requests.get(url)
+    user_data = response.json()
+    email = user_data.get('email')
+
+    # if not verified, return message
+    if not email:
+        response = Response("Please provide a valid google id_token!", status=200)
+        return response
+
+    # if verified
+    url = f"{API_GATEWAY_URL}/api/users?email={email}"
+    headers = {'id_token': id_token}
+    response = requests.get(url, headers=headers)
+    result = response.json()
+
+    # check if user exist
+    if len(result) == 0:
+        url = f"{API_GATEWAY_URL}/api/users"
+        user_id = str(uuid.uuid4())
+        template = {
+            'user_id': user_id,
+            'first_name': user_data['given_name'],
+            'last_name': user_data['family_name'],
+            'nickname': user_data['email'],
+            'email': user_data['email'],
+        }
+        response = requests.post(url, data=template, headers=headers)
+    else:
+        user_id = result[0]['user_id']
+
+    g.user_id = user_id
+    g.email = email
 
 resource = boto3.resource(
     'dynamodb',
@@ -136,6 +180,8 @@ def update_post(post_id):
 @app.route('/api/posts/<post_id>/comments', methods=['POST'])
 def create_comment(post_id):
     data = request.get_json()
+    if 'user_id' not in data:
+        data['user_id'] = g.user_id
     data['comment_id'] = str(uuid.uuid4())
     data['version_id'] = str(uuid.uuid4())
     create_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
@@ -193,8 +239,8 @@ def create_response(post_id, comment_index):
 
 @app.route('/')
 def hello_world():  # put application's code here
-    return 'Hello World!'
+    return f'Hello\n {g.email}\n {g.user_id}'
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host="0.0.0.0", port=5000)
