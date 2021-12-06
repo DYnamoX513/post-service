@@ -180,6 +180,8 @@ def update_post(post_id):
 @app.route('/api/posts/<post_id>/comments', methods=['POST'])
 def create_comment(post_id):
     data = request.get_json()
+    if 'user_id' not in data:
+        data['user_id'] = g.user_id
     data['comment_id'] = str(uuid.uuid4())
     data['version_id'] = str(uuid.uuid4())
     create_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
