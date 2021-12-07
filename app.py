@@ -9,9 +9,9 @@ import uuid
 import time
 from decimal import Decimal
 
-# AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
-# AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
-# REGION_NAME = config("REGION_NAME")
+AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
+REGION_NAME = config("REGION_NAME")
 
 app = Flask(__name__)
 
