@@ -1,3 +1,4 @@
+from operator import itemgetter
 from flask import Flask, Response, request, url_for, redirect, g
 from flask_cors import CORS
 import boto3
@@ -75,15 +76,13 @@ class DecimalEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def sort_posts(post):
-    return post['last_comment_time']
-
-
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
     search = request.args.get('search')
     offset = request.args.get('offset')
     limit = request.args.get('limit')
+    orderby_s = request.args.get('orderby')
+    reverse_s = request.args.get('reverse')
     if search is None:
         scan_kwargs = {
             'ProjectionExpression': "post_id, title, user_id, update_time, last_comment_time",
@@ -99,7 +98,13 @@ def get_posts():
     item = response['Items']
 
     # Bad: awkward pagination
-    item.sort(key=sort_posts, reverse=True)
+    if orderby_s is None:
+        orderby_s = "last_comment_time"
+    if reverse_s is None:
+        reverse = False
+    else:
+        reverse = bool(reverse_s)
+    item.sort(key=itemgetter(orderby_s), reverse=reverse)
     if offset is None:
         offset = 0
     if limit is None:
