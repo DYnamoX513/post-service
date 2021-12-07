@@ -114,7 +114,7 @@ def get_posts():
     else:
         limit = int(limit_s)
     end = min(len(item), offset + limit)
-    return_item = item[int(offset_s):end]
+    return_item = item[offset:end]
 
     next_link = "/api/posts?"+\
                 "offset="+str(offset+limit)+\
