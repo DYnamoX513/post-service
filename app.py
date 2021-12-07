@@ -23,7 +23,7 @@ CORS(app)
 
 @app.before_request
 def before_request():
-
+    # return
     # verify id_token
     id_token = request.headers.get('id_token')
     url = f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
@@ -79,8 +79,8 @@ class DecimalEncoder(json.JSONEncoder):
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
     search = request.args.get('search')
-    offset = request.args.get('offset')
-    limit = request.args.get('limit')
+    offset_s = request.args.get('offset')
+    limit_s = request.args.get('limit')
     orderby_s = request.args.get('orderby')
     reverse_s = request.args.get('reverse')
     if search is None:
@@ -101,19 +101,50 @@ def get_posts():
     if orderby_s is None:
         orderby_s = "last_comment_time"
     if reverse_s is None:
-        reverse = False
+        reverse = True
     else:
         reverse = bool(reverse_s)
     item.sort(key=itemgetter(orderby_s), reverse=reverse)
-    if offset is None:
+    if offset_s is None:
         offset = 0
-    if limit is None:
-        end = len(item)
     else:
-        end = min(len(item), int(offset) + int(limit))
-    return_item = item[int(offset):end]
+        offset = int(offset_s)
+    if limit_s is None:
+        limit = len(item)
+    else:
+        limit = int(limit_s)
+    end = min(len(item), offset + limit)
+    return_item = item[int(offset_s):end]
 
-    rsp = Response(json.dumps(return_item, cls=DecimalEncoder), status=200, content_type="application/json")
+    next_link = "/api/posts?"+\
+                "offset="+str(offset+limit)+\
+                "&limit="+str(limit)+\
+                "&orderby="+orderby_s+\
+                "&reverse="+str(reverse)
+    self_link = "/api/posts?"+\
+                "offset="+str(offset)+\
+                "&limit="+str(limit)+\
+                "&orderby="+orderby_s+\
+                "&reverse="+str(reverse)
+    prev_link = "/api/posts?"+\
+                "offset="+str(max(offset-limit, 0))+\
+                "&limit="+str(limit)+\
+                "&orderby="+orderby_s+\
+                "&reverse="+str(reverse)
+    if search is not None:
+        next_link += "&search="+search
+        self_link += "&search="+search
+        prev_link += "&search="+search
+
+    result = {
+        'data': return_item,
+        'links': {
+            'next':next_link,
+            'self':self_link,
+            'prev':prev_link
+        }
+    }
+    rsp = Response(json.dumps(result, cls=DecimalEncoder), status=200, content_type="application/json")
     return rsp
 
     # done = False
