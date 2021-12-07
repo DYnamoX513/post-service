@@ -8,9 +8,9 @@ import uuid
 import time
 from decimal import Decimal
 
-AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
-REGION_NAME = config("REGION_NAME")
+# AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+# AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
+# REGION_NAME = config("REGION_NAME")
 
 app = Flask(__name__)
 
@@ -75,22 +75,40 @@ class DecimalEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+def sort_posts(post):
+    return post['last_comment_time']
+
+
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
     search = request.args.get('search')
+    offset = request.args.get('offset')
+    limit = request.args.get('limit')
     if search is None:
         scan_kwargs = {
-            'ProjectionExpression': "post_id, title, user_id, update_time",
+            'ProjectionExpression': "post_id, title, user_id, update_time, last_comment_time",
         }
     else:
         search = search.lower()
         scan_kwargs = {
             'FilterExpression': Attr('search_title').contains(search),
-            'ProjectionExpression': "post_id, title, user_id, update_time",
+            'ProjectionExpression': "post_id, title, user_id, update_time, last_comment_time",
         }
     # Todo: pagination?
     response = table.scan(**scan_kwargs)
-    rsp = Response(json.dumps(response['Items'], cls=DecimalEncoder), status=200, content_type="application/json")
+    item = response['Items']
+
+    # Bad: awkward pagination
+    item.sort(key=sort_posts, reverse=True)
+    if offset is None:
+        offset = 0
+    if limit is None:
+        end = len(item)
+    else:
+        end = min(len(item), int(offset) + int(limit))
+    return_item = item[int(offset):end]
+
+    rsp = Response(json.dumps(return_item, cls=DecimalEncoder), status=200, content_type="application/json")
     return rsp
 
     # done = False
@@ -113,6 +131,7 @@ def create_post():
     create_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
     data['create_time'] = create_time
     data['update_time'] = create_time
+    data['last_comment_time'] = create_time
     data['search_title'] = data['title'].lower()
     try:
         # Condition: avoid duplicated partition key
@@ -193,10 +212,12 @@ def create_comment(post_id):
             Key={
                 'post_id': post_id
             },
-            UpdateExpression="SET comments = list_append(if_not_exists(comments, :empty_list), :c)",
+            UpdateExpression="SET comments = list_append(if_not_exists(comments, :empty_list), :c), "
+                             "last_comment_time = :t",
             ExpressionAttributeValues={
                 ':c': [data],
-                ':empty_list': []
+                ':empty_list': [],
+                ':t': create_time
             },
             ReturnValues="UPDATED_NEW"
         )
