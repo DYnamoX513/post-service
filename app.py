@@ -269,6 +269,8 @@ def create_comment(post_id):
 @app.route('/api/posts/<post_id>/comments/<comment_index>', methods=['POST'])
 def create_response(post_id, comment_index):
     data = request.get_json()
+    if 'user_id' not in data:
+        data['user_id'] = g.user_id
     data['response_id'] = str(uuid.uuid4())
     data['version_id'] = str(uuid.uuid4())
     create_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
