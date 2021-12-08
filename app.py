@@ -161,6 +161,8 @@ def get_posts():
 @app.route('/api/posts', methods=['POST'])
 def create_post():
     data = request.get_json()
+    if 'user_id' not in data:
+        data['user_id'] = g.user_id
     if 'post_id' not in data:
         data['post_id'] = str(uuid.uuid4())
     data['version_id'] = str(uuid.uuid4())
