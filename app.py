@@ -79,9 +79,9 @@ class DecimalEncoder(json.JSONEncoder):
 
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
-    data = request.get_json()
-    if data is not None and 'ids' in data:
-        specified_ids = data['ids']
+    ids = request.args.get('ids')
+    if ids is not None:
+        specified_ids = ids.split('.')
     else:
         specified_ids = None
 
