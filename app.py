@@ -1,3 +1,4 @@
+import distutils.util
 from operator import itemgetter
 from flask import Flask, Response, request, url_for, redirect, g
 from flask_cors import CORS
@@ -78,24 +79,50 @@ class DecimalEncoder(json.JSONEncoder):
 
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
+    data = request.get_json()
+    if data is not None and 'ids' in data:
+        specified_ids = data['ids']
+    else:
+        specified_ids = None
+
     search = request.args.get('search')
     offset_s = request.args.get('offset')
     limit_s = request.args.get('limit')
     orderby_s = request.args.get('orderby')
     reverse_s = request.args.get('reverse')
-    if search is None:
-        scan_kwargs = {
-            'ProjectionExpression': "post_id, title, user_id, update_time, last_comment_time",
-        }
+
+    if specified_ids is not None:
+        item = []
+        for pid in specified_ids:
+            if search is None:
+                response = table.query(
+                    KeyConditionExpression=Key('post_id').eq(pid),
+                    ProjectionExpression = "post_id, title, user_id, update_time, last_comment_time"
+                )
+            else:
+                response = table.query(
+                    KeyConditionExpression=Key('post_id').eq(pid),
+                    FilterExpression=Attr('search_title').contains(search),
+                    ProjectionExpression="post_id, title, user_id, update_time, last_comment_time"
+                )
+            item.extend(response['Items'])
     else:
-        search = search.lower()
-        scan_kwargs = {
-            'FilterExpression': Attr('search_title').contains(search),
-            'ProjectionExpression': "post_id, title, user_id, update_time, last_comment_time",
-        }
+        if search is None:
+            scan_kwargs = {
+                'ProjectionExpression': "post_id, title, user_id, update_time, last_comment_time",
+            }
+            response = table.scan(**scan_kwargs)
+            item = response['Items']
+        else:
+            search = search.lower()
+            scan_kwargs = {
+                'FilterExpression': Attr('search_title').contains(search),
+                'ProjectionExpression': "post_id, title, user_id, update_time, last_comment_time",
+            }
+            response = table.scan(**scan_kwargs)
+            item = response['Items']
     # Todo: pagination?
-    response = table.scan(**scan_kwargs)
-    item = response['Items']
+
 
     # Bad: awkward pagination
     if orderby_s is None:
@@ -103,7 +130,7 @@ def get_posts():
     if reverse_s is None:
         reverse = True
     else:
-        reverse = bool(reverse_s)
+        reverse = bool(distutils.util.strtobool(reverse_s))
     item.sort(key=itemgetter(orderby_s), reverse=reverse)
     if offset_s is None:
         offset = 0
